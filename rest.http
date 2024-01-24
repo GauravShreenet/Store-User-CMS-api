@@ -1,0 +1,50 @@
+@rootUrl = http://localhost:8000/api/v1
+@userApi = {{rootUrl}}/users
+
+# ======== user API
+###Register user
+POST {{userApi}}
+Content-Type: application/json
+
+{
+    "fName": "Gaurav",
+    "lName": "Shreenet",
+    "email": "a@a.com",
+    "phone": "0451352524",
+    "address": "32 Brittain Crescent, Hillsdale NSW",
+    "password": "aA1234"
+}
+
+###login user
+POST {{userApi}}/sign-in
+Content-Type: application/json
+
+{
+    "email": "b@b.com",
+    "password": "aA1234"
+}
+
+###get user profile
+GET {{userApi}}
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJAYi5jb20iLCJpYXQiOjE3MDUyODA2ODIsImV4cCI6MTcwNTI4MTU4Mn0.yS4Q1hV2Bvx9VC9g8PnAJb0V75gDgwZ-eMdDwJYTAiU
+
+###request otp
+POST {{userApi}}/request-otp
+Content-Type: application/json
+
+{
+    "email": "a@a.com"
+}
+
+###Update user profile
+PATCH {{userApi}}/user-profile
+Authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJAYi5jb20iLCJpYXQiOjE3MDU2NDEzMTksImV4cCI6MTcwNTY0MjIxOX0.UllvZTihG3fB7wEIWInIttytuktICNqPsP21ks43WcM
+Content-Type: application/json
+
+{
+    "_id": "65a47133ebc597c33989c325",
+    "fName": "Gaurav",
+    "lName": "Shreenet",
+    "phone": "0451352524",
+    "address": "32 Brittain Crescent, Hillsdale NSW"
+}
