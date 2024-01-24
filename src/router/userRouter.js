@@ -1,11 +1,14 @@
 import express from 'express';
 import { v4 as uuidv4} from 'uuid';
 import { responder } from '../middleware/response.js';
-import { newUserValidation } from '../middleware/joiValidation.js';
-import { insertUser } from '../model/user/UserModel.js';
-import { hashPassword } from '../utils/bcrypt.js';
-import { createNewSession } from '../model/session/SessionSchema.js';
-import { sendEmailVerificationLinkEmail } from '../utils/nodemailer.js';
+import { newUserValidation, resetPasswordValidation } from '../middleware/joiValidation.js';
+import { getAUser, insertUser, updateUser } from '../model/user/UserModel.js';
+import { comparePassword, hashPassword } from '../utils/bcrypt.js';
+import { createNewSession, deleteSession } from '../model/session/SessionSchema.js';
+import { passwordUpdateNotification, sendEmailVerificationLinkEmail, sendEmailVerifiedNotification, sendOptEmail } from '../utils/nodemailer.js';
+import { getJwts } from '../utils/jwt.js';
+import { refreshAuth, userAuth } from '../middleware/authMiddleWare.js';
+import { otpGenerator } from '../utils/randomGenerator.js';
 
 let router = express.Router();
 
@@ -50,11 +53,160 @@ router.post("/", newUserValidation, async(req, res, next)=> {
     }
 })
 
-router.get("/", (req, res, next) => {
+router.post("/verify-email", async(req, res, next) => {
+    try {
+        const { associate, token  } = req.body
+        if (associate && token){
+            const session = await deleteSession({ token, associate })
+
+            if (session?._id) {
+                const user = await updateUser({ email: associate }, { status: "active" })
+
+                if(user?._id) {
+                    sendEmailVerifiedNotification( {email: associate}, {fname: user.fName})
+                    return responder.SUCCESS({
+                        res,
+                        message: "Your email has been verified. You may sign in now"
+                    })
+                }
+            }
+        }
+        responder.ERROR({
+            res,
+            message: "Invalid or Expired Link"
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.post("/sign-in", async(req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        if(email && password) {
+            const user = await getAUser({ email })
+            if(user?.status === "inactive") {
+                return responder.ERROR({
+                    res,
+                    message: "Please verify your email. Your account has not been verified",
+                })
+            }
+            if(user?._id){
+                const isPasswordMatched = comparePassword(password, user.password)
+
+                if(isPasswordMatched) {
+                    const jwts = await getJwts(email)
+                    return responder.SUCCESS({
+                        res,
+                        message: "Login Successfully",
+                        jwts,
+                    })
+                }
+            }
+        }
+        responder.ERROR({
+            res,
+            mesage: 'Invalid Login'
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.get("/", userAuth, (req, res, next) => {
     try {
         responder.SUCCESS({
             res,
             message: 'Here is the user data',
+            user: req.userInfo
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.get("/get-accessjwt", refreshAuth)
+
+router.post("/logout", async (req, res, next)=>{
+    try{
+        const { accessJWT, _id } = req.body;
+        accessJWT && (await deleteSession({
+            token: accessJWT,
+        }))
+
+        await updateUser({ _id }, { refreshJWT: "" })
+
+        responder.SUCCESS({
+            res,
+            message: "User logged out successfully"
+        })
+    }
+    catch(error){
+        next(error)
+    }
+})
+
+router.post("/request-otp", async (req, res, next) => {
+    try {
+        const { email } = req.body
+        if(email.includes("@")) {
+            const user = await getAUser({ email })
+
+            if(user?._id) {
+                const otp = otpGenerator()
+                const otpSession = await createNewSession({
+                    token: otp,
+                    associate: email
+                })
+                if (otpSession?._id) {
+                    sendOptEmail({
+                        fName: user.fName,
+                        email,
+                        otp
+                    })
+                }
+            }
+        }
+        
+        responder.SUCCESS({
+            res,
+            message: "If your email is found in the system, we will send otp to your email please check your Junk/Spam folder too"
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.patch("/", resetPasswordValidation, async (req, res, next) => {
+    try {
+        const { email, otp, password } = req.body
+
+        const session = await deleteSession({
+            token: otp,
+            associate: email,
+        })
+
+        if (session?._id) {
+            const hashPass = hashPassword(password)
+
+            const user = await updateUser({ email }, { password: hashPass })
+
+            if(user?._id) {
+                passwordUpdateNotification({
+                    fName: user.fName,
+                    email,
+                })
+
+                return responder.SUCCESS({
+                    res,
+                    message: "Your password has been updated, you may login now"
+                })
+            }
+        }
+
+        responder.ERROR({
+            res,
+            message: "Invalid token, unable to rest your password, try again later"
         })
     } catch (error) {
         next(error)

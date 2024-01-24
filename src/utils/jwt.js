@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { createNewSession } from '../model/session/SessionSchema';
-import { updateUser } from '../model/user/UserModel';
+import { createNewSession } from '../model/session/SessionSchema.js';
+import { updateUser } from '../model/user/UserModel.js';
 
 export const createAccessJWT = async (email) => {
     const accessJWT = jwt.sign({email}, process.env.ACCESSJWT_SECRET, {
@@ -31,7 +31,7 @@ export const createRefreshJWT = async(email) => {
     return refreshJWT
 }
 
-export const verifyRefreshJWT = (refreshJWT) => {
+export const verifyRefreshJWT = async(refreshJWT) => {
     return jwt.verify(refreshJWT, process.env.REFRESHJWT_SECRET)
 }
 
