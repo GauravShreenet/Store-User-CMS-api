@@ -15,8 +15,10 @@ app.use(express.json())
 app.use(morgan("tiny"))
 
 import userRouter from './src/router/userRouter.js';
+import dataRouter from './src/router/fetchRouter.js'
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/products", dataRouter);
 
 app.get("/", (req, res) => {
     res.json({
