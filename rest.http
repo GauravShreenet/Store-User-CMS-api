@@ -1,5 +1,7 @@
 @rootUrl = http://localhost:8000/api/v1
 @userApi = {{rootUrl}}/users
+@productApi = {{rootUrl}}/products
+@catApi = {{rootUrl}}/categories
 
 # ======== user API
 ###Register user
@@ -48,3 +50,18 @@ Content-Type: application/json
     "phone": "0451352524",
     "address": "32 Brittain Crescent, Hillsdale NSW"
 }
+
+
+# ============== products
+### all products
+GET {{productApi}}
+
+
+### new arrival products
+GET {{productApi}}/new-arrival
+
+
+# ========= categories
+
+###Categories
+GET {{catApi}}/women-shoes

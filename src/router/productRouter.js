@@ -8,6 +8,25 @@ const uri = process.env.MONGO_URL;
 
 const client = new MongoClient(uri);
 
+router.get("/", async(req, res, next) => {
+    try {
+        await client.connect();
+
+        const dbName = client.db('fashon');
+        const colName = dbName.collection('products');
+
+        const allProducts = await colName.find({}).sort({ createdAt: -1 }).toArray()
+
+        return responder.SUCCESS({
+            res,
+            message: "Here are your products",
+            allProducts
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
 router.get("/new-arrival", async(req, res, next)=> {
     try {
         await client.connect();
