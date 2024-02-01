@@ -8,25 +8,6 @@ const uri = process.env.MONGO_URL;
 
 const client = new MongoClient(uri);
 
-router.get("/", async(req, res, next) => {
-    try {
-        await client.connect();
-
-        const dbName = client.db('fashon');
-        const colName = dbName.collection('products');
-
-        const allProducts = await colName.find({}).sort({ createdAt: -1 }).toArray()
-
-        return responder.SUCCESS({
-            res,
-            message: "Here are your products",
-            allProducts
-        })
-    } catch (error) {
-        next(error)
-    }
-})
-
 router.get("/new-arrival", async(req, res, next)=> {
     try {
         await client.connect();
@@ -47,24 +28,28 @@ router.get("/new-arrival", async(req, res, next)=> {
     }
 })
 
-router.get("/categories", async(req, res, next)=> {
+router.get("/:slug?", async(req, res, next) => {
     try {
         await client.connect();
 
         const dbName = client.db('fashon');
-        const colName = dbName.collection('categories')
+        const colName = dbName.collection('products');
 
-        const categories = await colName.find({}).toArray()
+        const { slug } = req.params;
+
+        const products = slug
+        ? await colName.findOne({ slug })
+        : await colName.find({}).sort({ createdAt: -1 }).toArray()
 
         return responder.SUCCESS({
             res,
-            message: "Here are the Categories",
-            categories
+            message: "Here are your products",
+            products,
         })
-
     } catch (error) {
         next(error)
     }
 })
+
 
 export default router;

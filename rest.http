@@ -56,6 +56,9 @@ Content-Type: application/json
 ### all products
 GET {{productApi}}
 
+### all products
+GET {{productApi}}/nike-airmax
+
 
 ### new arrival products
 GET {{productApi}}/new-arrival
