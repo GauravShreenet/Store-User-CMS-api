@@ -1,4 +1,4 @@
-import { decode } from "jsonwebtoken"
+
 import { createAccessJWT, verifyAccessJWT, verifyRefreshJWT } from "../utils/jwt.js"
 import { getSession } from "../model/session/SessionSchema.js"
 import { getAUser } from "../model/user/UserModel.js"
@@ -9,7 +9,7 @@ export const userAuth = async(req, res, next) => {
         const { authorization } = req.headers
 
         const decoded = verifyAccessJWT(authorization)
-        console.log(decoded)
+        
 
         if(decoded?.email) {
             const token = await getSession({ token: authorization, associate: decoded.email })
@@ -41,18 +41,21 @@ export const userAuth = async(req, res, next) => {
 }
 
 export const refreshAuth = async(req, res, next) => {
+    console.log("first")
     try {
-        const { authorization } = req.headers
+        const { authorization } = req.headers //refreshJWT
+        
         const decoded = await verifyRefreshJWT(authorization)
 
-        if(decode?.email) {
+        if(decoded?.email) {
             const user = await getAUser({
                 email: decoded.email,
                 refreshJWT: authorization,
             })
-
-            if(user?._id && user?.status === "active") {
+            
+            if(user?._id && user?.status === 'active') {
                 const accessJWT = await createAccessJWT(decoded.email)
+                console.log(accessJWT)
                 return responder.SUCCESS({
                     res,
                     message: "Here is the jwt",
@@ -63,11 +66,11 @@ export const refreshAuth = async(req, res, next) => {
 
         responder.ERROR({
             res,
-            errorCode: 410,
-            message: "Unauthorized"
+            errorCode: 401,
+            message: "Unauthorized TEST"
         })
-
     } catch (error) {
+        
         next(error)
     }
 }

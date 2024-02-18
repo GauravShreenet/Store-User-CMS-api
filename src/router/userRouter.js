@@ -125,7 +125,7 @@ router.get("/", userAuth, (req, res, next) => {
     }
 })
 
-router.get("/get-accessjwt", refreshAuth)
+router.get("/accessjwt", refreshAuth)
 
 router.post("/logout", async (req, res, next)=>{
     try{

@@ -28,7 +28,11 @@ Content-Type: application/json
 
 ###get user profile
 GET {{userApi}}
-Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJAYi5jb20iLCJpYXQiOjE3MDUyODA2ODIsImV4cCI6MTcwNTI4MTU4Mn0.yS4Q1hV2Bvx9VC9g8PnAJb0V75gDgwZ-eMdDwJYTAiU
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJAYi5jb20iLCJpYXQiOjE3MDgyMjExMzEsImV4cCI6MTcwODIyMTE5MX0.VZT5BBLcenLAeGu9edfL_r7IcsjX6YtJD0dhY8HDnqI
+
+###get access-jwt
+GET {{userApi}}/get-accessjwt
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJAYi5jb20iLCJpYXQiOjE3MDgyMjExMzEsImV4cCI6MTcxMDgxMzEzMX0.Msg2nWNQYdVSBIsaMLSSR4jhopjafd4gXZvojltHTnI
 
 ###request otp
 POST {{userApi}}/request-otp
