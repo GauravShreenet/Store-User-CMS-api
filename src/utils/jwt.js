@@ -4,7 +4,7 @@ import { updateUser } from '../model/user/UserModel.js';
 
 export const createAccessJWT = async (email) => {
     const accessJWT = jwt.sign({email}, process.env.ACCESSJWT_SECRET, {
-        expiresIn: "1m"
+        expiresIn: "15m"
     })
 
     await createNewSession({

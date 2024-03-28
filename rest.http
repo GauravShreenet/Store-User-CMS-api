@@ -2,6 +2,7 @@
 @userApi = {{rootUrl}}/users
 @productApi = {{rootUrl}}/products
 @catApi = {{rootUrl}}/categories
+@orderApi = {{rootUrl}}/orders
 
 # ======== user API
 ###Register user
@@ -22,7 +23,7 @@ POST {{userApi}}/sign-in
 Content-Type: application/json
 
 {
-    "email": "b@b.com",
+    "email": "a@a.com",
     "password": "aA1234"
 }
 
@@ -72,3 +73,10 @@ GET {{productApi}}/new-arrival
 
 ###Categories
 GET {{catApi}}/women-shoes
+
+
+# =============== user Order
+
+###get user orders
+GET {{orderApi}}
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFAYS5jb20iLCJpYXQiOjE3MDkzNDg0NDYsImV4cCI6MTcwOTM0OTM0Nn0.8jA1xOB_7F3gDmUd5zaJZMAqbzMs_lW2_S61E5wTh2k

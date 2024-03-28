@@ -47,3 +47,45 @@ export const resetPasswordValidation = (req, res, next) => {
 
     joiValidation({ schema, req, res, next })
 }
+
+export const newCartItemValidation = (req, res, next) => {
+    const schema = Joi.object({
+        userId: SHORTSTRREQ,
+        name: SHORTSTRREQ,
+        productId: SHORTSTRREQ,
+        slug: SHORTSTRREQ,
+        sku: SHORTSTRREQ,
+        size: SHORTSTRREQ,
+        color: SHORTSTRREQ,
+        qty: NUMREQ,
+        thumbnail: SHORTSTRREQ,
+    })
+
+    joiValidation({ schema, req, res, next })
+}
+
+export const newOrderValidation = (req, res, next) => {
+    const schema = Joi.object({
+        userId: SHORTSTRREQ,
+        fName: SHORTSTRREQ,
+        lName: SHORTSTRREQ,
+        address: SHORTSTRREQ,
+        phone: NUM,
+        email: EMAILREQ,
+        orderTotal: NUMREQ,
+        cartItem: Joi.array().items(
+            Joi.object({
+                name: SHORTSTRREQ,
+                productId: SHORTSTRREQ,
+                slug: SHORTSTRREQ,
+                price: NUMREQ,
+                size: SHORTSTRREQ,
+                color: SHORTSTRREQ,
+                qty: NUMREQ,
+                thumbnail: SHORTSTRREQ,
+            })
+        )        
+    })
+
+    joiValidation({ schema, req, res, next })
+}

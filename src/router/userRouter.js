@@ -2,7 +2,7 @@ import express from 'express';
 import { v4 as uuidv4} from 'uuid';
 import { responder } from '../middleware/response.js';
 import { newUserValidation, resetPasswordValidation } from '../middleware/joiValidation.js';
-import { getAUser, insertUser, updateUser } from '../model/user/UserModel.js';
+import { getAUser, getUserPasswordById, insertUser, updateUser } from '../model/user/UserModel.js';
 import { comparePassword, hashPassword } from '../utils/bcrypt.js';
 import { createNewSession, deleteSession } from '../model/session/SessionSchema.js';
 import { passwordUpdateNotification, sendEmailVerificationLinkEmail, sendEmailVerifiedNotification, sendOptEmail } from '../utils/nodemailer.js';
@@ -24,7 +24,6 @@ router.post("/", newUserValidation, async(req, res, next)=> {
             const token = await createNewSession({ token: c, associate: user.email })
             if(token?._id) {
                 const url = `${process.env.CLIENT_ROOT_DOMAIN}/verify-email?email=${user.email}&c=${c}`
-                console.log(url)
                 sendEmailVerificationLinkEmail({
                     email: user.email,
                     url,
@@ -104,9 +103,10 @@ router.post("/sign-in", async(req, res, next) => {
                 }
             }
         }
-        responder.ERROR({
-            res,
-            mesage: 'Invalid Login'
+        res.json({
+            status: 'error',
+            errorCode: 401,
+            message: "Invalid Email or Password. Please try again!!!"
         })
     } catch (error) {
         next(error)
@@ -212,5 +212,66 @@ router.patch("/", resetPasswordValidation, async (req, res, next) => {
         next(error)
     }
 })
+
+router.patch("/password", userAuth, async (req, res, next) => {
+    try {
+        const user = req.userInfo
+        const { oldPassword, newPassword } = req.body
+
+        const { password } = await getUserPasswordById(user._id)
+
+        const isMatched = comparePassword(oldPassword, password)
+
+        if(isMatched) {
+            const newHashPass = hashPassword(newPassword)
+
+            const updatedUser = await updateUser({_id: user._id}, { password: newHashPass })
+            if(updatedUser?._id){
+                passwordUpdateNotification({
+                    fName: user.fName,
+                    email: updatedUser.email,
+                })
+                return responder.SUCCESS({
+                    res,
+                    message: "Your password has been updated"
+                })
+            }
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.patch("/user-profile", userAuth, async (req, res, next) => {
+    try {
+        const user = req.userInfo
+        const { userPassword } = req.body;
+        const { password } = await getUserPasswordById(user._id)
+        const isMatched = comparePassword(userPassword, password)
+
+        if(isMatched){
+            const {_id, fName, lName, phone, address } = req.body
+            const updateProfile = await updateUser({ _id }, {
+                fName,
+                lName,
+                phone,
+                address,
+            })
+            if (updateProfile?._id) {
+                return responder.SUCCESS({
+                    res,
+                    message: "Your info has been updated!",
+                    updateProfile,
+                })
+            }
+        }
+        responder.ERROR({
+            res,
+            message: "Invalid data"
+        })
+    } catch (error) {
+        next(error)
+    }
+})  
 
 export default router;

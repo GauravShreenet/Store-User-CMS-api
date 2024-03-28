@@ -15,7 +15,7 @@ router.get("/new-arrival", async(req, res, next)=> {
         const dbName = client.db('fashon');
         const colName = dbName.collection('products');
 
-        const newArrive = await colName.find({}).sort({ createdAt: -1 }).limit(12).toArray()
+        const newArrive = await colName.find({ status: 'active' }).sort({ createdAt: -1 }).limit(12).toArray()
 
         return responder.SUCCESS({
             res,
@@ -39,7 +39,7 @@ router.get("/:slug?", async(req, res, next) => {
 
         const products = slug
         ? await colName.findOne({ slug })
-        : await colName.find({}).sort({ createdAt: -1 }).toArray()
+        : await colName.find({ status: 'active' }).sort({ createdAt: -1 }).toArray()
 
         return responder.SUCCESS({
             res,

@@ -19,16 +19,15 @@ router.get("/:slug?", async (req, res, next) => {
         const { slug } = req.params;
         if (slug) {
             //get the id of the category with destracturing
-            
+
             // const  category = await colName.findOne({ slug })
-            const  { _id } = await colName.findOne({ slug })
+            const { _id } = await colName.findOne({ slug })
 
             // const query = { parentCatId: (category._id).toString()}
-            const query = { parentCatId: _id.toString()}
-            console.log(query)
+            const query = { parentCatId: _id.toString() }
 
             const categoryProducts = await products.find(query).sort({ createdAt: -1 }).toArray();
-            
+
 
             return responder.SUCCESS({
                 res,
@@ -36,18 +35,16 @@ router.get("/:slug?", async (req, res, next) => {
                 categoryProducts,
             })
         }
-            const categories = await colName.find({}).toArray()
+        const categories = await colName.find({ status: 'active' }).toArray()
 
-            return responder.SUCCESS({
+        return responder.SUCCESS({
             res,
             message: "Here are the Categories",
             categories
-        })      
+        })
     } catch (error) {
         next(error)
     }
 })
-
-
 
 export default router;
