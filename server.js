@@ -7,7 +7,7 @@ import { connectDb } from './src/config/configDb.js';
 
 const app = express();
 
-const PORT = process.env.PROT || 8000
+const PORT = process.env.PORT || 8000
 
 connectDb();
 app.use(cors());
